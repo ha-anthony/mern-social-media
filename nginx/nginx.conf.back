@@ -1,0 +1,25 @@
+server {
+    listen 443 ssl;
+    server_name _;  # This matches any hostname, including the IP address
+
+    ssl_certificate /etc/nginx/ssl/nginx.crt;
+    ssl_certificate_key /etc/nginx/ssl/nginx.key;
+
+    # Location block for /api to redirect to port 5000
+    location /api {
+        proxy_pass http://backend:8080;  # Requests to /api will be forwarded to http://localhost:5000/api
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Location block for all other traffic (frontend)
+    location / {
+        proxy_pass http://frontend:3000;  # Your frontend application
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
